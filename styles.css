@@ -250,6 +250,8 @@ body::before{
 }
 
 /* Réponses: même police/gras que les questions */
+
+/* Réponses : même police et même gras que les questions */
 .is-answer .content{
   font-family: "InterExtraBold", system-ui, -apple-system, sans-serif;
   font-weight: 800;
