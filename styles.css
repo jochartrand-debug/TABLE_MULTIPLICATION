@@ -248,3 +248,9 @@ body::before{
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   font-weight: 400;
 }
+
+/* Réponses: même police/gras que les questions */
+.is-answer .content{
+  font-family: "InterExtraBold", system-ui, -apple-system, sans-serif;
+  font-weight: 800;
+}
