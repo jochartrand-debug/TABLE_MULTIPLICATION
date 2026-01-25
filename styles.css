@@ -365,3 +365,15 @@ body {
 /* --- Désactiver le flash (anti-stroboscope) --- */
 .poof-overlay{background: transparent !important;}
 .poof-overlay.active{opacity: 0 !important; animation: none !important;}
+
+/* ===== FADE + ZOOM (QA only) ===== */
+.card.fadeZoom {
+  opacity: 0;
+  transform: scale(0.97);
+  transition: opacity 220ms ease-out, transform 220ms ease-out;
+}
+
+.card.fadeZoom.active {
+  opacity: 1;
+  transform: scale(1);
+}

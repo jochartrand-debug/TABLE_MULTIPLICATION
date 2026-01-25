@@ -209,22 +209,15 @@ function createParticles() {
 }
 
 async function playPoof() {
-  // 1. Overlay flash
-  const overlay = createPoofOverlay();
-  // Flash désactivé (anti-stroboscope)
-  // overlay.classList.add('active');
-  
-  // 2. Le contenu explose
-  card.classList.add('poofing');
-  
-  // 3. (particules désactivées)
-  
-  // 4. Attend la fin de l'animation
-  await new Promise(resolve => setTimeout(resolve, 260));
-  
-  // 5. Nettoie
-  // overlay.classList.remove('active');
-  card.classList.remove('poofing');
+  // FADE + ZOOM (QUESTION → RÉPONSE)
+  card.classList.add("fadeZoom");
+  // force reflow
+  card.offsetHeight;
+  card.classList.add("active");
+
+  await new Promise(r => setTimeout(r, 220));
+
+  card.classList.remove("fadeZoom", "active");
 }
 
 function playAppear() {
