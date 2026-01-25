@@ -164,12 +164,12 @@ function pickNextQuestion() {
 // ============ TRANSITION (DIM PULSE) ============
 
 async function playPoof() {
-  // DIM PULSE minimaliste (QUESTION → RÉPONSE)
-  card.classList.add("dimPulse");
+  // DIM GLOBAL minimaliste (QUESTION → RÉPONSE)
+  document.body.classList.add("flash-answer");
 
-  await new Promise(r => setTimeout(r, 220));
+  await new Promise(r => setTimeout(r, 140));
 
-  card.classList.remove("dimPulse");
+  document.body.classList.remove("flash-answer");
 }
 
 function playAppear() {

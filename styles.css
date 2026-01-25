@@ -312,12 +312,29 @@ body {
 /* --- Désactiver le flash (anti-stroboscope) --- */
 
 /* ===== DIM PULSE (QA only) ===== */
-.card.dimPulse {
-  animation: dimPulse 220ms ease-in-out;
-}
 
-@keyframes dimPulse {
-  0%   { opacity: 1; }
   50%  { opacity: 0.85; }
   100% { opacity: 1; }
+}
+
+/* ===== DIM GLOBAL (QA only) ===== */
+body::before{
+  content:"";
+  position: fixed;
+  inset: 0;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+.flash-answer::before{
+  animation: dimGlobal 140ms ease-out;
+}
+@keyframes dimGlobal{
+  0%{opacity:0;}
+  40%{opacity:0.12;}
+  100%{opacity:0;}
+}
+@media (prefers-reduced-motion: reduce){
+  .flash-answer::before{ animation:none; }
 }
