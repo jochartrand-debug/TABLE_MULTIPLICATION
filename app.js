@@ -180,20 +180,20 @@ function createParticles() {
   const centerY = rect.height / 2;
 
   // Particules de fumée (blobs) — plus grosses, floues, qui se dissipent
-  const N = 60;
+  const N = 24;
   for (let i = 0; i < N; i++) {
     const p = document.createElement("div");
     p.className = "poof-particle smoke";
 
-    const size = 22 + Math.random() * 48; // 22–70 px
+    const size = 18 + Math.random() * 34; // 18–52 px
     p.style.width = size + "px";
     p.style.height = size + "px";
 
     // Trajectoire: surtout vers le haut, avec dispersion latérale
-    const tx = (Math.random() - 0.5) * 320;      // -160..160
-    const ty = -(120 + Math.random() * 320);     // -120..-440 (monte)
+    const tx = (Math.random() - 0.5) * 220;      // -110..110
+    const ty = -(90 + Math.random() * 220);      // -90..-310 (monte)
     const rot = (Math.random() - 0.5) * 40;      // petite rotation
-    const delay = Math.random() * 140;           // léger décalage
+    const delay = Math.random() * 80;            // léger décalage
 
     p.style.left = centerX + "px";
     p.style.top = centerY + "px";
@@ -210,7 +210,7 @@ function createParticles() {
   card.appendChild(container);
 
   // Nettoie après l'animation
-  setTimeout(() => container.remove(), 1200);
+  setTimeout(() => container.remove(), 900);
 }
 
 async function playPoof() {
