@@ -224,10 +224,6 @@ async function playPoof() {
   card.classList.remove('poofing');
 }
 
-function playAppear() {
-  card.classList.add('appearing');
-  setTimeout(() => card.classList.remove('appearing'), 400);
-}
 
 function renderPlain(s){
   return String(s);
@@ -248,13 +244,11 @@ function render() {
     const q = data[state.currentIndex]?.q ?? "—";
     const prettyQ = q.replace(/×/g, '<span class="op">×</span>');
     elContent.innerHTML = `<span class="q-single">${prettyQ}</span>`;
-    playAppear();
   }
 
   if (state.mode === "answer") {
     const answer = data[state.currentIndex]?.a ?? "—";
     elContent.innerHTML = `<span class="a-line">${renderNoteMarkup(answer)}</span>`;
-    playAppear();
     return;
   }
 }

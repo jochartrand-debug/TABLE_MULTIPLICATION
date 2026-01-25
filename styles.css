@@ -285,42 +285,16 @@ body {
 }
 
 /* L'apparition du nouveau contenu */
-.card.appearing #content {
-  animation: contentAppear 0.4s ease-out forwards;
-}
-
-@keyframes contentAppear {
-  0% {
-    opacity: 0;
-    transform: scale(0.7) rotate(-5deg);
-    filter: blur(10px);
-  }
-  60% {
-    transform: scale(1.05) rotate(0deg);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) rotate(0deg);
-    filter: blur(0px);
-  }
-}
-
 @media (prefers-reduced-motion: reduce){
   .poof-overlay.active,
   .card.poofing #content,
-  .card.appearing #content,
   .poof-particle.burst {
     animation: none !important;
   }
   .card.poofing #content {
     opacity: 0;
   }
-  .card.appearing #content {
-    opacity: 1;
-  }
-}
-
-/* Question sur une seule ligne (multiplications) */
+  /* Question sur une seule ligne (multiplications) */
 .q-single{
   display:block;
   text-align:center;
