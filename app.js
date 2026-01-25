@@ -136,6 +136,8 @@ const tapArea = document.getElementById("tapArea");
 
 // État
 let data = [];
+let skipNextAppear = false;
+
 let state = {
   mode: "home",
   deck: [],
@@ -248,7 +250,8 @@ function render() {
     const q = data[state.currentIndex]?.q ?? "—";
     const prettyQ = q.replace(/×/g, '<span class="op">×</span>');
     elContent.innerHTML = `<span class="q-single">${prettyQ}</span>`;
-    playAppear();
+    if (!skipNextAppear) playAppear();
+    skipNextAppear = false;
   }
 
   if (state.mode === "answer") {
@@ -277,8 +280,8 @@ async function handleTap() {
   }
 
   if (state.mode === "answer") {
-    // POOF spectaculaire !
-    await playPoof();
+    // AUCUNE transition entre la réponse et la question suivante
+    skipNextAppear = true;
     pickNextQuestion();
     render();
     await idbSet("state", state);
