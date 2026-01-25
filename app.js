@@ -61,10 +61,6 @@ function shuffledIndices(n) {
   return a;
 }
 
-
-
-
-
 function formatQuestionTwoLines(q) {
   const s = (q ?? '').trim();
   if (!s) return '';
@@ -110,13 +106,10 @@ function renderNoteMarkup(str){
   return `<span class="note-letter">${letter}</span><span class="accidental">${accNorm}</span>`;
 }
 
-
-
 // ---------------- UI ----------------
 const card = document.getElementById("card");
 const elContent = document.getElementById("content");
 const homeImg = document.getElementById("homeImg");
-// Compat : certaines versions utilisaient elCard
 const elCard = card;
 
 const themeToggleBtn = document.getElementById("themeToggle");
@@ -144,7 +137,7 @@ const tapArea = document.getElementById("tapArea");
 // État
 let data = [];
 let state = {
-  mode: "home",      // "home" | "question" | "answer"
+  mode: "home",
   deck: [],
   pos: 0,
   currentIndex: null
@@ -166,79 +159,115 @@ function pickNextQuestion() {
   state.mode = "question";
 }
 
-// Petite transition douce du texte
-function flashAnswer(){
-  const el = document.body;
-  el.classList.remove("flash-answer");
-  requestAnimationFrame(() => {
-    el.classList.add("flash-answer");
-    setTimeout(() => el.classList.remove("flash-answer"), 200);
-  });
+// ============ ANIMATION POOF SPECTACULAIRE ============
+
+function createPoofOverlay() {
+  let overlay = document.querySelector('.poof-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.className = 'poof-overlay';
+    document.body.appendChild(overlay);
+  }
+  return overlay;
 }
 
+function createParticles() {
+  const container = document.createElement("div");
+  container.className = "poof-particles";
 
-// Transition "pouf" (nuage) entre question ↔ réponse
-function poofSwap(doSwap){
-  const DUR = 260;
-  // Nettoie
-  card.classList.remove("poof-in","poof-out");
-  // Déclenche sortie
-  card.classList.add("poof-out");
-  // Attend la fin du fade-out puis swap + fade-in
-  setTimeout(() => {
-    doSwap();
-    // force reflow pour garantir l'animation
-    void card.offsetWidth;
-    card.classList.remove("poof-out");
-    card.classList.add("poof-in");
-    setTimeout(() => card.classList.remove("poof-in"), DUR);
-  }, DUR);
+  const rect = card.getBoundingClientRect();
+  const centerX = rect.width / 2;
+  const centerY = rect.height / 2;
+
+  // Particules de fumée (blobs) — plus grosses, floues, qui se dissipent
+  const N = 60;
+  for (let i = 0; i < N; i++) {
+    const p = document.createElement("div");
+    p.className = "poof-particle smoke";
+
+    const size = 22 + Math.random() * 48; // 22–70 px
+    p.style.width = size + "px";
+    p.style.height = size + "px";
+
+    // Trajectoire: surtout vers le haut, avec dispersion latérale
+    const tx = (Math.random() - 0.5) * 320;      // -160..160
+    const ty = -(120 + Math.random() * 320);     // -120..-440 (monte)
+    const rot = (Math.random() - 0.5) * 40;      // petite rotation
+    const delay = Math.random() * 140;           // léger décalage
+
+    p.style.left = centerX + "px";
+    p.style.top = centerY + "px";
+    p.style.setProperty("--tx", tx + "px");
+    p.style.setProperty("--ty", ty + "px");
+    p.style.setProperty("--rot", rot + "deg");
+    p.style.setProperty("--delay", delay + "ms");
+
+    container.appendChild(p);
+    // Lance l'animation après insertion
+    setTimeout(() => p.classList.add("burst"), 10);
+  }
+
+  card.appendChild(container);
+
+  // Nettoie après l'animation
+  setTimeout(() => container.remove(), 1200);
+}
+
+async function playPoof() {
+  // 1. Overlay flash
+  const overlay = createPoofOverlay();
+  overlay.classList.add('active');
+  
+  // 2. Le contenu explose
+  card.classList.add('poofing');
+  
+  // 3. Crée des particules
+  createParticles();
+  
+  // 4. Attend la fin de l'animation
+  await new Promise(resolve => setTimeout(resolve, 620));
+  
+  // 5. Nettoie
+  overlay.classList.remove('active');
+  card.classList.remove('poofing');
+}
+
+function playAppear() {
+  card.classList.add('appearing');
+  setTimeout(() => card.classList.remove('appearing'), 400);
 }
 
 function renderPlain(s){
-  // garde sur une seule ligne (multiplications)
   return String(s);
 }
 
 function render() {
-  // Ne pas écraser className (sinon on perd les classes d'animation).
-  card.classList.add("card");
-  card.classList.toggle("home", state.mode === "home");
-  card.classList.toggle("question", state.mode === "question");
-  card.classList.toggle("answer", state.mode === "answer");
-
-  // Classes utilitaires pour unifier la typographie (CSS : .is-question/.is-answer)
+  card.className = "card " + state.mode;
   card.classList.toggle("is-question", state.mode === "question");
   card.classList.toggle("is-answer", state.mode === "answer");
 
   if (state.mode === "home") {
-  card.className = "card home";
-  if (homeImg) homeImg.src = "assets/accueil.png";
-  return;
-}
+    card.className = "card home";
+    if (homeImg) homeImg.src = "assets/accueil.png";
+    return;
+  }
 
   if (state.mode === "question") {
     const q = data[state.currentIndex]?.q ?? "—";
     const prettyQ = q.replace(/×/g, '<span class="op">×</span>');
     elContent.innerHTML = `<span class="q-single">${prettyQ}</span>`;
-    // (classes gérées plus haut)
+    playAppear();
   }
 
   if (state.mode === "answer") {
     const answer = data[state.currentIndex]?.a ?? "—";
-    flashAnswer();
     elContent.innerHTML = `<span class="a-line">${renderNoteMarkup(answer)}</span>`;
+    playAppear();
     return;
   }
 }
 
-// Flow:
-// Accueil -> Question aléatoire (sans répétition)
-// Question -> Réponse
-// Réponse -> Nouvelle question (sans répétition)
-// Après toutes les paires -> retour Accueil + reset
 async function handleTap() {
-  // Accueil -> Question (sans poof, plus direct)
   if (state.mode === "home") {
     pickNextQuestion();
     render();
@@ -246,30 +275,25 @@ async function handleTap() {
     return;
   }
 
-  // Question -> Réponse (poof)
   if (state.mode === "question") {
-    poofSwap(() => {
-      state.mode = "answer";
-      render();
-    });
+    // POOF spectaculaire !
+    await playPoof();
+    state.mode = "answer";
+    render();
     await idbSet("state", state);
     return;
   }
 
-  // Réponse -> Nouvelle question (poof)
   if (state.mode === "answer") {
-    poofSwap(() => {
-      pickNextQuestion(); // si fini: home + reset
-      render();
-    });
+    // Pas de poof ici: on passe simplement à la prochaine question
+    pickNextQuestion();
+    render();
     await idbSet("state", state);
     return;
   }
 }
 
-
 async function boot() {
-  // Thème pédagogique (question/réponse inversables)
   applyScheme(getSavedScheme());
   if (themeToggleBtn) {
     themeToggleBtn.addEventListener("click", (e) => {
@@ -291,11 +315,9 @@ async function boot() {
   const saved = await idbGet("state");
   if (saved && typeof saved === "object") state = saved;
 
-  // Toujours démarrer à l’accueil (évite de reprendre sur une question après une session)
   state.mode = "home";
   state.currentIndex = null;
 
-  // Si data.json a changé, on reconstruit
   if (!Array.isArray(state.deck) || state.deck.length !== data.length) {
     resetDeck();
     state.mode = "home";
@@ -304,10 +326,10 @@ async function boot() {
   render();
   await idbSet("state", state);
 
-  tapArea.addEventListener("pointerup", (e) => {
-    // Unifie souris + tactile, évite les doubles déclenchements
+  tapArea.addEventListener("click", handleTap);
+  tapArea.addEventListener("touchend", (e) => {
     e.preventDefault();
-    handleTap().catch(()=>{});
+    handleTap();
   }, { passive: false });
 }
 
