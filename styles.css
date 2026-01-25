@@ -42,6 +42,8 @@ body {
 
   padding: var(--pad);
   border-radius: 18px;
+  position: relative;
+  overflow: hidden;
 }
 
 /* Question / Accueil : blanc sur noir */
@@ -274,4 +276,59 @@ body::before{
 
   /* renfort supplémentaire très subtil (évite l'effet "maigre" sur certains rendus) */
   filter: drop-shadow(0 0 0 rgba(0,0,0,0.25));
+}
+
+
+
+/* ---------------- Poof (petit nuage) ---------------- */
+:root{
+  --poof-dur: 260ms;
+}
+
+/* la carte disparaît un peu + petit nuage */
+.card.poof-out{
+  animation: poofOut var(--poof-dur) ease-in forwards;
+}
+.card.poof-in{
+  animation: poofIn var(--poof-dur) ease-out forwards;
+}
+
+/* Nuage : 3 taches + blur, visible sur fond sombre et clair */
+.card.poof-out::after,
+.card.poof-in::after{
+  content:"";
+  position:absolute;
+  left:-10%;
+  top:30%;
+  width:120%;
+  height:60%;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 30% 55%, rgba(255,255,255,.55) 0 22%, rgba(255,255,255,0) 28%),
+    radial-gradient(circle at 55% 45%, rgba(255,255,255,.45) 0 26%, rgba(255,255,255,0) 33%),
+    radial-gradient(circle at 75% 60%, rgba(255,255,255,.40) 0 20%, rgba(255,255,255,0) 28%);
+  filter: blur(2px);
+  opacity: 0;
+  transform: translateY(8px) scale(.95);
+  animation: poofCloud var(--poof-dur) ease-out forwards;
+  mix-blend-mode: screen;
+}
+
+@keyframes poofOut{
+  0%{opacity:1; transform: scale(1); filter: blur(0px);}
+  100%{opacity:0; transform: scale(.985); filter: blur(1.5px);}
+}
+@keyframes poofIn{
+  0%{opacity:0; transform: scale(.99); filter: blur(1.5px);}
+  100%{opacity:1; transform: scale(1); filter: blur(0px);}
+}
+@keyframes poofCloud{
+  0%{opacity:0; transform: translateY(10px) scale(.9);}
+  35%{opacity:.95;}
+  100%{opacity:0; transform: translateY(-8px) scale(1.08);}
+}
+
+@media (prefers-reduced-motion: reduce){
+  .card.poof-out, .card.poof-in{ animation: none; }
+  .card.poof-out::after, .card.poof-in::after{ animation:none; opacity:0; }
 }

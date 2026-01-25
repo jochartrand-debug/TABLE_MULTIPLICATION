@@ -176,13 +176,36 @@ function flashAnswer(){
   });
 }
 
+
+// Transition "pouf" (nuage) entre question ↔ réponse
+function poofSwap(doSwap){
+  const DUR = 260;
+  // Nettoie
+  card.classList.remove("poof-in","poof-out");
+  // Déclenche sortie
+  card.classList.add("poof-out");
+  // Attend la fin du fade-out puis swap + fade-in
+  setTimeout(() => {
+    doSwap();
+    // force reflow pour garantir l'animation
+    void card.offsetWidth;
+    card.classList.remove("poof-out");
+    card.classList.add("poof-in");
+    setTimeout(() => card.classList.remove("poof-in"), DUR);
+  }, DUR);
+}
+
 function renderPlain(s){
   // garde sur une seule ligne (multiplications)
   return String(s);
 }
 
 function render() {
-  card.className = "card " + state.mode;
+  // Ne pas écraser className (sinon on perd les classes d'animation).
+  card.classList.add("card");
+  card.classList.toggle("home", state.mode === "home");
+  card.classList.toggle("question", state.mode === "question");
+  card.classList.toggle("answer", state.mode === "answer");
 
   // Classes utilitaires pour unifier la typographie (CSS : .is-question/.is-answer)
   card.classList.toggle("is-question", state.mode === "question");
@@ -204,7 +227,6 @@ function render() {
   if (state.mode === "answer") {
     const answer = data[state.currentIndex]?.a ?? "—";
     flashAnswer();
-    flashAnswer();
     elContent.innerHTML = `<span class="a-line">${renderNoteMarkup(answer)}</span>`;
     return;
   }
@@ -216,6 +238,7 @@ function render() {
 // Réponse -> Nouvelle question (sans répétition)
 // Après toutes les paires -> retour Accueil + reset
 async function handleTap() {
+  // Accueil -> Question (sans poof, plus direct)
   if (state.mode === "home") {
     pickNextQuestion();
     render();
@@ -223,20 +246,27 @@ async function handleTap() {
     return;
   }
 
+  // Question -> Réponse (poof)
   if (state.mode === "question") {
-    state.mode = "answer";
-    render();
+    poofSwap(() => {
+      state.mode = "answer";
+      render();
+    });
     await idbSet("state", state);
     return;
   }
 
+  // Réponse -> Nouvelle question (poof)
   if (state.mode === "answer") {
-    pickNextQuestion(); // si fini: home + reset
-    render();
+    poofSwap(() => {
+      pickNextQuestion(); // si fini: home + reset
+      render();
+    });
     await idbSet("state", state);
     return;
   }
 }
+
 
 async function boot() {
   // Thème pédagogique (question/réponse inversables)
@@ -274,10 +304,10 @@ async function boot() {
   render();
   await idbSet("state", state);
 
-  tapArea.addEventListener("click", handleTap);
-  tapArea.addEventListener("touchend", (e) => {
+  tapArea.addEventListener("pointerup", (e) => {
+    // Unifie souris + tactile, évite les doubles déclenchements
     e.preventDefault();
-    handleTap();
+    handleTap().catch(()=>{});
   }, { passive: false });
 }
 
