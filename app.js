@@ -209,15 +209,15 @@ function createParticles() {
 }
 
 async function playPoof() {
-  // FADE + ZOOM (QUESTION → RÉPONSE)
-  card.classList.add("fadeZoom");
+  // FADE SIMPLE (QUESTION → RÉPONSE)
+  card.classList.add("fade");
   // force reflow
   card.offsetHeight;
   card.classList.add("active");
 
   await new Promise(r => setTimeout(r, 220));
 
-  card.classList.remove("fadeZoom", "active");
+  card.classList.remove("fade", "active");
 }
 
 function playAppear() {
