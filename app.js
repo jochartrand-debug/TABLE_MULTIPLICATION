@@ -116,6 +116,8 @@ function renderNoteMarkup(str){
 const card = document.getElementById("card");
 const elContent = document.getElementById("content");
 const homeImg = document.getElementById("homeImg");
+// Compat : certaines versions utilisaient elCard
+const elCard = card;
 
 const themeToggleBtn = document.getElementById("themeToggle");
 
@@ -164,18 +166,16 @@ function pickNextQuestion() {
   state.mode = "question";
 }
 
-
-function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
-
-async function poufOnce(){
-  // Relance l’animation en retirant puis en remettant la classe
-  card.classList.remove("pouf");
-  // force reflow
-  void card.offsetWidth;
-  card.classList.add("pouf");
-  await sleep(220);
-  card.classList.remove("pouf");
+// Petite transition douce du texte
+function flashAnswer(){
+  const el = document.body;
+  el.classList.remove("flash-answer");
+  requestAnimationFrame(() => {
+    el.classList.add("flash-answer");
+    setTimeout(() => el.classList.remove("flash-answer"), 200);
+  });
 }
+
 function renderPlain(s){
   // garde sur une seule ligne (multiplications)
   return String(s);
@@ -183,6 +183,10 @@ function renderPlain(s){
 
 function render() {
   card.className = "card " + state.mode;
+
+  // Classes utilitaires pour unifier la typographie (CSS : .is-question/.is-answer)
+  card.classList.toggle("is-question", state.mode === "question");
+  card.classList.toggle("is-answer", state.mode === "answer");
 
   if (state.mode === "home") {
   card.className = "card home";
@@ -194,15 +198,14 @@ function render() {
     const q = data[state.currentIndex]?.q ?? "—";
     const prettyQ = q.replace(/×/g, '<span class="op">×</span>');
     elContent.innerHTML = `<span class="q-single">${prettyQ}</span>`;
-    card.classList.add("is-question");
-    card.classList.remove("is-answer");
-}
+    // (classes gérées plus haut)
+  }
 
   if (state.mode === "answer") {
     const answer = data[state.currentIndex]?.a ?? "—";
+    flashAnswer();
+    flashAnswer();
     elContent.innerHTML = `<span class="a-line">${renderNoteMarkup(answer)}</span>`;
-    card.classList.add("is-answer");
-    card.classList.remove("is-question");
     return;
   }
 }
@@ -221,7 +224,6 @@ async function handleTap() {
   }
 
   if (state.mode === "question") {
-    await poufOnce();
     state.mode = "answer";
     render();
     await idbSet("state", state);

@@ -33,9 +33,7 @@ body {
 
 /* Carte pédagogique */
 .card {
-  position: relative;
-  overflow: hidden;
-width: min(92vw, 980px);
+  width: min(92vw, 980px);
   min-height: 70vh;
 
   display: flex;
@@ -208,6 +206,25 @@ width: min(92vw, 980px);
 
 /* Transition minimaliste "dim pulse" (overlay fixe, n'affecte pas la mise en page)
    Déclenchée seulement à l'apparition de la réponse. */
+body::before{
+  content:"";
+  position: fixed;
+  inset: 0;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+.flash-answer::before{
+  animation: dimPulse 140ms ease-out;
+}
+@keyframes dimPulse{
+  0%{opacity:0;}
+  40%{opacity:0.12;}
+  100%{opacity:0;}
+}
+@media (prefers-reduced-motion: reduce){
+  .flash-answer::before{ animation:none; }
 }
 
 /* Question sur une seule ligne (multiplications) */
@@ -248,49 +265,13 @@ width: min(92vw, 980px);
 
 /* Compensation optique iOS : les réponses paraissent souvent plus fines sur fond blanc.
    Ajuste ANSWER_STROKE si nécessaire (0.35 -> 0.55 typiquement). */
+:root { --answer-stroke: 0.55px; }
 
+.is-answer .content {
+  /* micro-épaisseur sans flou (Safari iOS) */
+  -webkit-text-stroke: var(--answer-stroke) rgba(0,0,0,0.001);
+  text-stroke: var(--answer-stroke) rgba(0,0,0,0.001);
 
-/* Transition "pouf" (fumée) : animée sur la tuile seulement (pas sur le texte) */
-.card.pouf::after{
-  content:"";
-  position:absolute;
-  inset:-20%;
-  pointer-events:none;
-  background:
-    radial-gradient(circle at 30% 30%, rgba(255,255,255,0.18), rgba(255,255,255,0) 55%),
-    radial-gradient(circle at 70% 40%, rgba(255,255,255,0.14), rgba(255,255,255,0) 60%),
-    radial-gradient(circle at 45% 75%, rgba(255,255,255,0.12), rgba(255,255,255,0) 58%);
-  filter: blur(10px);
-  opacity: 0;
-  transform: scale(0.98);
-  animation: poufSmoke 220ms ease-out forwards;
-}
-
-@keyframes poufSmoke{
-  0%   { opacity: 0;   transform: scale(0.98); }
-  20%  { opacity: 0.35; }
-  100% { opacity: 0;   transform: scale(1.02); }
-}
-
-@media (prefers-reduced-motion: reduce){
-  .card.pouf::after{ animation: none; opacity: 0; }
-}
-
-
-/* iOS: unifier le rendu gras (pas d'opacity/transform/filter/transition sur le texte) */
-.q-single, .a-line{
-  font-family: "InterExtraBold", system-ui, -apple-system, sans-serif;
-  font-weight: 800;
-  opacity: 1 !important;
-  transform: none !important;
-  filter: none !important;
-  transition: none !important;
-  -webkit-font-smoothing: auto;
-  text-rendering: geometricPrecision;
-}
-
-/* Opérateur × dans la question: non gras */
-.q-single .op{
-  font-family: "InterExtraBold", system-ui, -apple-system, sans-serif;
-  font-weight: 400;
+  /* renfort supplémentaire très subtil (évite l'effet "maigre" sur certains rendus) */
+  filter: drop-shadow(0 0 0 rgba(0,0,0,0.25));
 }
