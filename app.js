@@ -211,7 +211,8 @@ function createParticles() {
 async function playPoof() {
   // 1. Overlay flash
   const overlay = createPoofOverlay();
-  overlay.classList.add('active');
+  // Flash désactivé (anti-stroboscope)
+  // overlay.classList.add('active');
   
   // 2. Le contenu explose
   card.classList.add('poofing');
@@ -222,7 +223,7 @@ async function playPoof() {
   await new Promise(resolve => setTimeout(resolve, 260));
   
   // 5. Nettoie
-  overlay.classList.remove('active');
+  // overlay.classList.remove('active');
   card.classList.remove('poofing');
 }
 
