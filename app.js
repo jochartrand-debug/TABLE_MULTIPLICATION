@@ -164,16 +164,18 @@ function pickNextQuestion() {
   state.mode = "question";
 }
 
-// Petite transition douce du texte
-function flashAnswer(){
-  const el = document.body;
-  el.classList.remove("flash-answer");
-  requestAnimationFrame(() => {
-    el.classList.add("flash-answer");
-    setTimeout(() => el.classList.remove("flash-answer"), 200);
-  });
-}
 
+function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
+
+async function poufOnce(){
+  // Relance l’animation en retirant puis en remettant la classe
+  card.classList.remove("pouf");
+  // force reflow
+  void card.offsetWidth;
+  card.classList.add("pouf");
+  await sleep(220);
+  card.classList.remove("pouf");
+}
 function renderPlain(s){
   // garde sur une seule ligne (multiplications)
   return String(s);
@@ -192,15 +194,15 @@ function render() {
     const q = data[state.currentIndex]?.q ?? "—";
     const prettyQ = q.replace(/×/g, '<span class="op">×</span>');
     elContent.innerHTML = `<span class="q-single">${prettyQ}</span>`;
-    elCard.classList.add("is-question");
-    elCard.classList.remove("is-answer");
-  }
+    card.classList.add("is-question");
+    card.classList.remove("is-answer");
+}
 
   if (state.mode === "answer") {
     const answer = data[state.currentIndex]?.a ?? "—";
-    flashAnswer();
-    flashAnswer();
     elContent.innerHTML = `<span class="a-line">${renderNoteMarkup(answer)}</span>`;
+    card.classList.add("is-answer");
+    card.classList.remove("is-question");
     return;
   }
 }
@@ -219,6 +221,7 @@ async function handleTap() {
   }
 
   if (state.mode === "question") {
+    await poufOnce();
     state.mode = "answer";
     render();
     await idbSet("state", state);
