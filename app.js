@@ -214,8 +214,7 @@ async function playPoof() {
   // 2. Le contenu explose
   card.classList.add('poofing');
   
-  // 3. Crée des particules
-  createParticles();
+  // 3. (particules désactivées)
   
   // 4. Attend la fin de l'animation
   await new Promise(resolve => setTimeout(resolve, 500));
