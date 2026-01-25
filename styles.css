@@ -366,12 +366,13 @@ body {
 .poof-overlay{background: transparent !important;}
 .poof-overlay.active{opacity: 0 !important; animation: none !important;}
 
-/* ===== FADE SIMPLE (QA only) ===== */
-.card.fade {
-  opacity: 0;
-  transition: opacity 220ms ease-out;
+/* ===== DIM PULSE (QA only) ===== */
+.card.dimPulse {
+  animation: dimPulse 220ms ease-in-out;
 }
 
-.card.fade.active {
-  opacity: 1;
+@keyframes dimPulse {
+  0%   { opacity: 1; }
+  50%  { opacity: 0.85; }
+  100% { opacity: 1; }
 }

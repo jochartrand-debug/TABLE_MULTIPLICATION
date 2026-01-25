@@ -209,15 +209,12 @@ function createParticles() {
 }
 
 async function playPoof() {
-  // FADE SIMPLE (QUESTION → RÉPONSE)
-  card.classList.add("fade");
-  // force reflow
-  card.offsetHeight;
-  card.classList.add("active");
+  // DIM PULSE minimaliste (QUESTION → RÉPONSE)
+  card.classList.add("dimPulse");
 
   await new Promise(r => setTimeout(r, 220));
 
-  card.classList.remove("fade", "active");
+  card.classList.remove("dimPulse");
 }
 
 function playAppear() {
