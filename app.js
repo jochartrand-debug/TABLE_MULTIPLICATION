@@ -172,45 +172,38 @@ function createPoofOverlay() {
 }
 
 function createParticles() {
-  const container = document.createElement("div");
-  container.className = "poof-particles";
-
+  const container = document.createElement('div');
+  container.className = 'poof-particles';
+  
   const rect = card.getBoundingClientRect();
   const centerX = rect.width / 2;
   const centerY = rect.height / 2;
-
-  // Particules de fumée (blobs) — plus grosses, floues, qui se dissipent
-  const N = 24;
-  for (let i = 0; i < N; i++) {
-    const p = document.createElement("div");
-    p.className = "poof-particle smoke";
-
-    const size = 18 + Math.random() * 34; // 18–52 px
-    p.style.width = size + "px";
-    p.style.height = size + "px";
-
-    // Trajectoire: surtout vers le haut, avec dispersion latérale
-    const tx = (Math.random() - 0.5) * 220;      // -110..110
-    const ty = -(90 + Math.random() * 220);      // -90..-310 (monte)
-    const rot = (Math.random() - 0.5) * 40;      // petite rotation
-    const delay = Math.random() * 80;            // léger décalage
-
-    p.style.left = centerX + "px";
-    p.style.top = centerY + "px";
-    p.style.setProperty("--tx", tx + "px");
-    p.style.setProperty("--ty", ty + "px");
-    p.style.setProperty("--rot", rot + "deg");
-    p.style.setProperty("--delay", delay + "ms");
-
-    container.appendChild(p);
-    // Lance l'animation après insertion
-    setTimeout(() => p.classList.add("burst"), 10);
+  
+  // 16 particules explosant dans toutes les directions
+  for (let i = 0; i < 16; i++) {
+    const particle = document.createElement('div');
+    particle.className = 'poof-particle';
+    
+    const angle = (i / 16) * Math.PI * 2;
+    const distance = 100 + Math.random() * 60;
+    const tx = Math.cos(angle) * distance;
+    const ty = Math.sin(angle) * distance;
+    
+    particle.style.left = centerX + 'px';
+    particle.style.top = centerY + 'px';
+    particle.style.setProperty('--tx', tx + 'px');
+    particle.style.setProperty('--ty', ty + 'px');
+    
+    container.appendChild(particle);
+    
+    // Déclenche l'animation après un court délai
+    setTimeout(() => particle.classList.add('burst'), 10);
   }
-
+  
   card.appendChild(container);
-
+  
   // Nettoie après l'animation
-  setTimeout(() => container.remove(), 900);
+  setTimeout(() => container.remove(), 700);
 }
 
 async function playPoof() {
@@ -225,7 +218,7 @@ async function playPoof() {
   createParticles();
   
   // 4. Attend la fin de l'animation
-  await new Promise(resolve => setTimeout(resolve, 620));
+  await new Promise(resolve => setTimeout(resolve, 500));
   
   // 5. Nettoie
   overlay.classList.remove('active');
@@ -285,7 +278,8 @@ async function handleTap() {
   }
 
   if (state.mode === "answer") {
-    // Pas de poof ici: on passe simplement à la prochaine question
+    // POOF spectaculaire !
+    await playPoof();
     pickNextQuestion();
     render();
     await idbSet("state", state);
