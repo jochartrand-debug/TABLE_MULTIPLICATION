@@ -219,7 +219,7 @@ async function playPoof() {
   // 3. (particules désactivées)
   
   // 4. Attend la fin de l'animation
-  await new Promise(resolve => setTimeout(resolve, 500));
+  await new Promise(resolve => setTimeout(resolve, 260));
   
   // 5. Nettoie
   overlay.classList.remove('active');
