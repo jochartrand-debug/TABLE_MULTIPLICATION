@@ -161,52 +161,7 @@ function pickNextQuestion() {
   state.mode = "question";
 }
 
-// ============ ANIMATION POOF SPECTACULAIRE ============
-
-function createPoofOverlay() {
-  let overlay = document.querySelector('.poof-overlay');
-  if (!overlay) {
-    overlay = document.createElement('div');
-    overlay.className = 'poof-overlay';
-    document.body.appendChild(overlay);
-  }
-  return overlay;
-}
-
-function createParticles() {
-  const container = document.createElement('div');
-  container.className = 'poof-particles';
-  
-  const rect = card.getBoundingClientRect();
-  const centerX = rect.width / 2;
-  const centerY = rect.height / 2;
-  
-  // 16 particules explosant dans toutes les directions
-  for (let i = 0; i < 16; i++) {
-    const particle = document.createElement('div');
-    particle.className = 'poof-particle';
-    
-    const angle = (i / 16) * Math.PI * 2;
-    const distance = 100 + Math.random() * 60;
-    const tx = Math.cos(angle) * distance;
-    const ty = Math.sin(angle) * distance;
-    
-    particle.style.left = centerX + 'px';
-    particle.style.top = centerY + 'px';
-    particle.style.setProperty('--tx', tx + 'px');
-    particle.style.setProperty('--ty', ty + 'px');
-    
-    container.appendChild(particle);
-    
-    // Déclenche l'animation après un court délai
-    setTimeout(() => particle.classList.add('burst'), 10);
-  }
-  
-  card.appendChild(container);
-  
-  // Nettoie après l'animation
-  setTimeout(() => container.remove(), 700);
-}
+// ============ TRANSITION (DIM PULSE) ============
 
 async function playPoof() {
   // DIM PULSE minimaliste (QUESTION → RÉPONSE)
