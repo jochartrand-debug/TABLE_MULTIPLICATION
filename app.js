@@ -137,6 +137,7 @@ const tapArea = document.getElementById("tapArea");
 // État
 let data = [];
 let skipNextAppear = false;
+let tapLocked = false;
 
 let state = {
   mode: "home",
@@ -209,29 +210,39 @@ function render() {
 }
 
 async function handleTap() {
-  if (state.mode === "home") {
-    pickNextQuestion();
-    render();
-    await idbSet("state", state);
-    return;
-  }
+  if (tapLocked) return;
+  tapLocked = true;
 
-  if (state.mode === "question") {
-    // POOF spectaculaire !
-    await playPoof();
-    state.mode = "answer";
-    render();
-    await idbSet("state", state);
-    return;
-  }
+  try {
+    if (state.mode === "home") {
+      pickNextQuestion();
+      render();
+      await idbSet("state", state);
+      return;
+    }
 
-  if (state.mode === "answer") {
-    // AUCUNE transition entre la réponse et la question suivante
-    skipNextAppear = true;
-    pickNextQuestion();
-    render();
-    await idbSet("state", state);
-    return;
+    if (state.mode === "question") {
+      // POOF spectaculaire !
+      await playPoof();
+      state.mode = "answer";
+      render();
+      await idbSet("state", state);
+      return;
+    }
+
+    if (state.mode === "answer") {
+      // AUCUNE transition entre la réponse et la question suivante
+      skipNextAppear = true;
+      pickNextQuestion();
+      render();
+      await idbSet("state", state);
+      return;
+    }
+  } finally {
+    // Anti double-tap iOS/PWA : ignore les événements répétés sur une courte fenêtre
+    setTimeout(() => {
+      tapLocked = false;
+    }, 350);
   }
 }
 
@@ -269,10 +280,6 @@ async function boot() {
   await idbSet("state", state);
 
   tapArea.addEventListener("click", handleTap);
-  tapArea.addEventListener("touchend", (e) => {
-    e.preventDefault();
-    handleTap();
-  }, { passive: false });
 }
 
 boot().catch(err => {
