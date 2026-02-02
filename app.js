@@ -279,7 +279,57 @@ async function boot() {
   render();
   await idbSet("state", state);
 
-  tapArea.addEventListener("click", handleTap);
+  // Tap + swipe (haut/bas/droite/gauche) = même effet
+  // iOS/PWA: on privilégie touchend (plus fiable). On garde click pour desktop.
+  let __suppressClickUntil = 0;
+  let __touchActive = false;
+  let __sx = 0, __sy = 0;
+  let __moved = false;
+
+  const __MOVE_EPS = 6; // px
+
+  tapArea.addEventListener("click", (e) => {
+    if (Date.now() < __suppressClickUntil) {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+    e.preventDefault();
+    handleTap();
+  }, { passive: false });
+
+  tapArea.addEventListener("touchstart", (e) => {
+    if (!e.touches || e.touches.length !== 1) return;
+    const t = e.touches[0];
+    __sx = t.clientX;
+    __sy = t.clientY;
+    __moved = false;
+    __touchActive = true;
+  }, { passive: true });
+
+  tapArea.addEventListener("touchmove", (e) => {
+    if (!__touchActive || !e.touches || e.touches.length !== 1) return;
+    const t = e.touches[0];
+    const dx = t.clientX - __sx;
+    const dy = t.clientY - __sy;
+    if (Math.abs(dx) > __MOVE_EPS || Math.abs(dy) > __MOVE_EPS) __moved = true;
+
+    // L'app ne scroll pas: empêcher Safari d'interpréter le geste comme scroll/gesture
+    if (__moved) e.preventDefault();
+  }, { passive: false });
+
+  tapArea.addEventListener("touchend", (e) => {
+    if (!__touchActive) return;
+    __touchActive = false;
+
+    // Empêche le click synthétique après touch/swipe
+    e.preventDefault();
+    __suppressClickUntil = Date.now() + 500;
+
+    // Tap OU swipe → même effet
+    handleTap();
+  }, { passive: false });
+
 }
 
 boot().catch(err => {

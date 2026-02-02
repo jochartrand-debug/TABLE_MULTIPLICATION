@@ -338,3 +338,6 @@ body::before{
 @media (prefers-reduced-motion: reduce){
   .flash-answer::before{ animation:none; }
 }
+
+/* Swipe/tap zone: empêcher les gestes de scroll iOS */
+#tapArea{ touch-action: none; -webkit-tap-highlight-color: transparent; }
